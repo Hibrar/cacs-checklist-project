@@ -6,6 +6,6 @@ resource "aws_instance" "springboot_app" {
   key_name = var.key_name
 
   tags = {
-    Name = "springboot-app"
+    Name = "springboot-app-dev"
   }
 }

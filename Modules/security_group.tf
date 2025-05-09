@@ -1,4 +1,4 @@
-# Vreating a security group for teh EC2 instance and ALB
+# Creating a security group for teh EC2 instance and ALB
 resource "aws_security_group" "allow_tls" {
   name = "web_sg"
   description = "Allow HTTP and SSH"
