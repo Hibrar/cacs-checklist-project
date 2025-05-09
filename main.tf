@@ -20,3 +20,8 @@ terraform {
 provider "aws" {
   region = "eu-west-2"
 }
+
+
+module "cacs_checklist_module" {
+  source = "./Modules"
+}
