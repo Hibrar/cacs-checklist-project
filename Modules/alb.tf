@@ -6,6 +6,13 @@ resource "aws_launch_template" "springboot_lt" {
   instance_type = var.instance_type
   key_name      = var.key_name
 
+
+    iam_instance_profile {
+    name = aws_iam_instance_profile.cacs_instance_profile.name
+  }
+
+
+
   vpc_security_group_ids = [aws_security_group.allow_tls.id]
 
   tag_specifications {
