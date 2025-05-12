@@ -1,4 +1,54 @@
-#Creating a target group for the Spring Boot app
+## Launch Template
+# Blueprint for EC2 instance creation
+resource "aws_launch_template" "springboot_lt" {
+  name_prefix   = "springboot-lt-"
+  image_id      = data.aws_ami.get_ami.id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+
+  vpc_security_group_ids = [aws_security_group.allow_tls.id]
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = "springboot-instance"
+    }
+  }
+}
+
+##Auto Scalign Group
+# Automatically creating and managing EC2 instance
+resource "aws_autoscaling_group" "springboot_asg" {
+  name                      = "springboot-asg"
+  desired_capacity          = 1
+  max_size                  = 2
+  min_size                  = 1
+  vpc_zone_identifier       = data.aws_subnets.public.ids
+  health_check_type         = "EC2"
+  health_check_grace_period = 30
+  force_delete              = true
+#Linking the AG to the launch template
+  launch_template {
+    id      = aws_launch_template.springboot_lt.id
+    version = "$Latest"
+  }
+# Attaching the ASG to the Target Group for the ALB
+  target_group_arns = [aws_lb_target_group.springboot_tg.arn]
+
+  tag {
+    key                 = "Name"
+    value               = "springboot-asg-instance"
+    propagate_at_launch = true
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+
+#Creating a target group for the Spring Boot app - Communicates to the ALB where to sent the traffic (port 80)
 resource "aws_lb_target_group" "springboot_tg" {
   name = "springboot-tg"
   port = 80
@@ -6,7 +56,7 @@ resource "aws_lb_target_group" "springboot_tg" {
   target_type = "instance"
   vpc_id   = data.aws_vpc.default.id
 
-  #Health check settings to monitor the EC2 instance availability
+  #Health check settings to monitor if the instance is working
   health_check {
     path = "/"
     protocol = "HTTP"
@@ -34,7 +84,7 @@ resource "aws_lb_target_group" "springboot_tg" {
  **The ALB only sends traffic to healthy instances. if the EC2 app crashes, it ownt receive traffic**
  */
 
-#Creating the ALB
+#Creating the ALB - Handles traffic and sends it to healthy instances
 resource "aws_lb" "springboot_alb" {
   name = "springboot-alb"
   internal = false
@@ -61,9 +111,10 @@ resource "aws_lb_listener" "http_listener" {
   }
 }
 
-#Attaching the EC2 instance to the target group
-resource "aws_lb_target_group_attachment" "ec2_attachment" {
-  target_group_arn = aws_lb_target_group.springboot_tg.arn
-  target_id = aws_instance.springboot_app.id
-  port = 80
-}
+##This is the EC2 Direct Attachment - this was used when there was a single EC2 instance however since ASG is used, this code is not needed
+# #Attaching the EC2 instance to the target group
+# resource "aws_lb_target_group_attachment" "ec2_attachment" {
+#   target_group_arn = aws_lb_target_group.springboot_tg.arn
+#   target_id = aws_instance.springboot_app.id
+#   port = 80
+# }
