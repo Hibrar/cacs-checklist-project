@@ -8,20 +8,29 @@ resource "aws_kms_key" "demo_kms_key" {
 
 # Store MongoDB credentials securely in Secrets Manager
 
-resource "aws_secretsmanager_secret" "db_credentials" {
-  name       = "db-credentials"                 # Secret name visible in AWS Console
-  kms_key_id = aws_kms_key.demo_kms_key.key_id       # Use the KMS key to encrypt this secret
-}
+# resource "aws_secretsmanager_secret" "db_credentials" {
+#   name       = "db-credentials"                 # Secret name visible in AWS Console
+#   kms_key_id = aws_kms_key.demo_kms_key.key_id       # Use the KMS key to encrypt this secret
+# }
 
 # Define the DB credentials (username and password)
 
-resource "aws_secretsmanager_secret_version" "db_credentials_version" {
-  secret_id     = aws_secretsmanager_secret.db_credentials.id
-  secret_string = jsonencode({                        # Store values in JSON format
-    username = var.db_username,
-    password = var.db_password
-  })
+# resource "aws_secretsmanager_secret_version" "db_credentials_version" {
+#   secret_id     = aws_secretsmanager_secret.db_credentials.id
+#   secret_string = jsonencode({                        # Store values in JSON format
+#     username = var.db_username,
+#     password = var.db_password
+#   })
+# }
+data "aws_secretsmanager_secret_version" "mongo_creds" {
+  secret_id = "mongodb-credentials"
 }
+
+
+data "aws_secretsmanager_secret" "mongo_secret" {
+  name = "mongodb-credentials"
+}
+
 
 # Store an API token securely in Secrets Manager (e.g., used by the CACS application)
 
@@ -57,7 +66,7 @@ resource "aws_iam_policy" "access_secrets" {
           "secretsmanager:DescribeSecret"
         ],
         Resource = [
-          aws_secretsmanager_secret.db_credentials.arn,
+          data.aws_secretsmanager_secret.mongo_secret.arn,
           aws_secretsmanager_secret.api_token.arn
         ]
       }
