@@ -49,7 +49,7 @@ resource "aws_instance" "mongodb_ec2" {
 
 resource "null_resource" "mongo_setup" {
   depends_on = [aws_instance.mongodb_ec2]
-
+#Updated private key
   connection {
     type        = "ssh"
     host        = aws_instance.mongodb_ec2.public_ip
