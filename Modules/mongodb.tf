@@ -38,7 +38,7 @@ resource "aws_security_group" "mongodb_sg" {
 resource "aws_instance" "mongodb_ec2" {
   ami                    = data.aws_ssm_parameter.amazon_linux_ami.value
   instance_type          = "t2.micro"
-  key_name               = "ssh_key" # Replace with your actual key pair name
+  key_name               = "terraform_access" # Replace with your actual key pair name
   vpc_security_group_ids = [aws_security_group.mongodb_sg.id]
   iam_instance_profile = aws_iam_instance_profile.cacs_instance_profile.name
 
