@@ -25,7 +25,7 @@ provider "aws" {
 module "cacs_checklist_module" {
   source      = "./Modules"
 
-  db_username = var.db_username
-  db_password = var.db_password
+  # db_username = var.db_username
+  # db_password = var.db_password
   api_token   = var.api_token
 }
