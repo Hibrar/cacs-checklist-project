@@ -16,7 +16,9 @@ resource "aws_security_group" "mongodb_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${trimspace(data.http.my_ip.response_body)}/32"]
+    # This only allows the local IP - Terraform Cloud is running the provisioner from its own IP not the local machine
+    #cidr_blocks = ["${trimspace(data.http.my_ip.response_body)}/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
