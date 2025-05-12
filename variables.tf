@@ -9,6 +9,11 @@
 #   type        = string
 #   sensitive   = true
 # }
+variable "ssh_private_key" {
+  description = "The private key for MongoDB EC2 SSH access"
+  type        = string
+  sensitive   = true
+}
 
 variable "api_token" {
   description = "API token for integration"

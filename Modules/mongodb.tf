@@ -54,7 +54,8 @@ resource "null_resource" "mongo_setup" {
     type        = "ssh"
     host        = aws_instance.mongodb_ec2.public_ip
     user        = "ec2-user"
-    private_key = file("C:/Users/HainesM/.ssh/ssh_key.pem")
+    private_key = var.ssh_private_key
+
 
   }
 

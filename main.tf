@@ -28,4 +28,5 @@ module "cacs_checklist_module" {
   # db_username = var.db_username
   # db_password = var.db_password
   api_token   = var.api_token
+  ssh_private_key  = var.ssh_private_key
 }
