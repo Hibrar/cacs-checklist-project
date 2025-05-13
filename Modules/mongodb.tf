@@ -61,107 +61,55 @@ resource "null_resource" "mongo_setup" {
 
   }
 
-#   provisioner "remote-exec" {
-#     inline = [
-#       "set -e",
-#
-#       "sudo tee /etc/yum.repos.d/mongodb-org-8.0.repo > /dev/null <<'EOF'",
-#       "[mongodb-org-8.0]",
-#       "name=MongoDB Repository",
-#       "baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/8.0/x86_64/",
-#       "gpgcheck=1",
-#       "enabled=1",
-#       "gpgkey=https://pgp.mongodb.com/server-8.0.asc",
-#       "EOF",
-#
-#       "echo 'Sleeping to allow repo sync...'",
-#       "sleep 10",
-#
-#       "sudo yum clean all",
-#       "sudo yum makecache --refresh",
-#       "sudo yum install -y mongodb-org",
-#
-#       "sudo systemctl enable mongod",
-#       "sudo systemctl start mongod",
-#       "sleep 10",
-#       "sudo yum install -y jq",
-# ## Installing mongosh for Amazon Linux 2023
-#
-#       "sudo tee /etc/yum.repos.d/mongodb-org-7.0.repo > /dev/null <<'EOF'",
-#       "[mongodb-org-7.0]",
-#       "name=MongoDB Repository",
-#       "baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/7.0/x86_64/",
-#       "gpgcheck=1",
-#       "enabled=1",
-#       "gpgkey=https://pgp.mongodb.com/server-7.0.asc",
-#       "EOF",
-#
-#       "sudo yum install -y mongodb-mongosh",
-#
-#
-#
-#       "SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id mongodb-credentials --query SecretString --output text)",
-#       "USERNAME=$(echo $SECRET_JSON | jq -r .username)",
-#       "PASSWORD=$(echo $SECRET_JSON | jq -r .password)",
-#       "mongosh --eval \"db.getSiblingDB('admin').createUser({user:'$USERNAME',pwd:'$PASSWORD',roles:[{role:'userAdminAnyDatabase',db:'admin'},{role:'readWriteAnyDatabase',db:'admin'}]})\"",
-#
-#       "sudo sed -i '/^#*security:/,/^[^ ]/d' /etc/mongod.conf",
-#       "echo -e '\nsecurity:\n  authorization: enabled' | sudo tee -a /etc/mongod.conf",
-#       "sudo sed -i 's/^  bindIp: .*/  bindIp: 0.0.0.0/' /etc/mongod.conf",
-#
-#       "sudo systemctl restart mongod"
-#     ]
-#   }
-}
-
-
-  provisioner "remote-exec"{
+  provisioner "remote-exec" {
     inline = [
       "set -e",
 
-  # Add MongoDB 8.0 repo
-       "sudo tee /etc/yum.repos.d/mongodb-org-8.0.repo > /dev/null <<'EOF'",
-        "[mongodb-org-8.0]",
-        "name=MongoDB Repository",
-        "baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/8.0/x86_64/",
-        "gpgcheck=1",
-        "enabled=1",
-        "gpgkey=https://pgp.mongodb.com/server-8.0.asc",
-        "EOF",
+      # Add MongoDB 8.0 repo
+      "sudo tee /etc/yum.repos.d/mongodb-org-8.0.repo > /dev/null <<'EOF'",
+      "[mongodb-org-8.0]",
+      "name=MongoDB Repository",
+      "baseurl=https://repo.mongodb.org/yum/amazon/2023/mongodb-org/8.0/x86_64/",
+      "gpgcheck=1",
+      "enabled=1",
+      "gpgkey=https://pgp.mongodb.com/server-8.0.asc",
+      "EOF",
 
-        "echo 'Sleeping to allow repo sync...'",
-        "sleep 10",
+      "echo 'Sleeping to allow repo sync...'",
+      "sleep 10",
 
-        "sudo yum clean all",
-        "sudo yum makecache --refresh",
-        "sudo yum install -y mongodb-org",
+      "sudo yum clean all",
+      "sudo yum makecache --refresh",
+      "sudo yum install -y mongodb-org",
 
-        "sudo systemctl enable mongod",
-        "sudo systemctl start mongod",
-        "sleep 10",
-        "sudo yum install -y jq curl tar",
+      "sudo systemctl enable mongod",
+      "sudo systemctl start mongod",
+      "sleep 10",
+      "sudo yum install -y jq curl tar",
 
-        # Install mongosh manually
-        "curl -LO https://downloads.mongodb.com/compass/mongosh-2.1.5-linux-x64.tgz",
-        "tar -xvzf mongosh-2.1.5-linux-x64.tgz",
-        "sudo mv mongosh-2.1.5-linux-x64/bin/mongosh /usr/local/bin/",
-        "rm -rf mongosh-2.1.5-linux-x64*",
+      # Install mongosh manually
+      "curl -LO https://downloads.mongodb.com/compass/mongosh-2.1.5-linux-x64.tgz",
+      "tar -xvzf mongosh-2.1.5-linux-x64.tgz",
+      "sudo mv mongosh-2.1.5-linux-x64/bin/mongosh /usr/local/bin/",
+      "rm -rf mongosh-2.1.5-linux-x64*",
 
-        # Use secrets from Secrets Manager to create user
-        "SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id mongodb-credentials --query SecretString --output text)",
-        "USERNAME=$(echo $SECRET_JSON | jq -r .username)",
-        "PASSWORD=$(echo $SECRET_JSON | jq -r .password)",
-        "mongosh --eval \"db.getSiblingDB('admin').createUser({user:'$USERNAME',pwd:'$PASSWORD',roles:[{role:'userAdminAnyDatabase',db:'admin'},{role:'readWriteAnyDatabase',db:'admin'}]})\"",
+      # Use secrets from Secrets Manager to create user
+      "SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id mongodb-credentials --query SecretString --output text)",
+      "USERNAME=$(echo $SECRET_JSON | jq -r .username)",
+      "PASSWORD=$(echo $SECRET_JSON | jq -r .password)",
+      "mongosh --eval \"db.getSiblingDB('admin').createUser({user:'$USERNAME',pwd:'$PASSWORD',roles:[{role:'userAdminAnyDatabase',db:'admin'},{role:'readWriteAnyDatabase',db:'admin'}]})\"",
 
-        # Enable authentication
-        "sudo sed -i '/^#*security:/,/^[^ ]/d' /etc/mongod.conf",
-        "echo -e '\nsecurity:\n  authorization: enabled' | sudo tee -a /etc/mongod.conf",
-        "sudo sed -i 's/^  bindIp: .*/  bindIp: 0.0.0.0/' /etc/mongod.conf",
+      # Enable authentication
+      "sudo sed -i '/^#*security:/,/^[^ ]/d' /etc/mongod.conf",
+      "echo -e '\nsecurity:\n  authorization: enabled' | sudo tee -a /etc/mongod.conf",
+      "sudo sed -i 's/^  bindIp: .*/  bindIp: 0.0.0.0/' /etc/mongod.conf",
 
-        "sudo systemctl restart mongod"
+      "sudo systemctl restart mongod"
     ]
-
+  }
 }
+
+
 
 # output "mongodb_connection_info" {
 #   value = "mongodb://<hidden-username>:<hidden-password>@${aws_instance.mongodb_ec2.public_ip}:27017"
