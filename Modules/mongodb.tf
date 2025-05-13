@@ -17,7 +17,7 @@ resource "aws_security_group" "mongodb_sg" {
     to_port     = 22
     protocol    = "tcp"
     # This only allows the local IP - Terraform Cloud is running the provisioner from its own IP not the local machine
-    #cidr_blocks = ["${trimspace(data.http.my_ip.response_body)}/32"]
+   # cidr_blocks = ["${trimspace(data.http.my_ip.response_body)}/32"]
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -85,6 +85,9 @@ resource "null_resource" "mongo_setup" {
       "sudo systemctl start mongod",
       "sleep 10",
       "sudo yum install -y jq",
+## Installing mongosh for Amazon Linux 2023
+      "curl -o mongosh.rpm https://downloads.mongodb.com/compass/mongosh-2.1.5.x86_64.rpm",
+      "sudo yum install -y ./mongosh.rpm",
 
       "SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id mongodb-credentials --query SecretString --output text)",
       "USERNAME=$(echo $SECRET_JSON | jq -r .username)",
