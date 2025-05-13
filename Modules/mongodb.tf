@@ -63,7 +63,7 @@ resource "null_resource" "mongo_setup" {
     private_key = file("C:/Users/IbrarH/.ssh/terraform_access.pem")
 
   }
-
+#Updated provisioner block
   provisioner "remote-exec" {
     inline = [
       "set -e",
